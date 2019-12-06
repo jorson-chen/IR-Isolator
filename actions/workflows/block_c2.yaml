@@ -2,12 +2,8 @@
 version: 1.0
 
 input:
-  - intf_name: ""
+  - ip: ""
   - device: ""
-
-vars:
-  - tries: 0
-  - maxtries: 1
 
 tasks:
   start:
@@ -27,17 +23,18 @@ tasks:
       inventory_file: "inventory/lab.inv"
       extra_vars:
         - ip=<% ctx(ip) %>
+        - device=<% ctx(device) %>
     next:
       -
         when: <% succeeded() %>
         publish:
-          - msg: "IP <% ctx(ip) %> has been blocked."
+          - msg: "IP <% ctx(ip) %> has been blocked at <% ctx(device) %>."
         do:
           - notify_slack
       -
         when: <% failed() %>
         publish:
-          - msg: "Failed to block IP: <% ctx(ip) %>."
+          - msg: "Failed to block IP: <% ctx(ip) %> at <% ctx(device) %>."
         do:
           - notify_slack
 
