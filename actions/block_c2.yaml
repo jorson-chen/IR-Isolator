@@ -1,0 +1,13 @@
+---
+name: block_c2
+pack: secops_lab
+description: Run action to block C2 server
+runner_type: orquesta
+entry_point: workflows/block_c2.yaml
+enabled: true
+parameters:
+  device:
+    type: string
+    default: edge_utm
+  ip:
+    type: string

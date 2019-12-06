@@ -1,0 +1,9 @@
+Value name (\w+)
+Value id (\d+)
+Value address ([\d\.]+)
+Value prefix (\d{1,2})
+Value flags ([-\w]+)
+
+
+Start
+  ^${name}\s+${id}\s+${address}\s+/${prefix}\s+${flags}\s+ -> Record

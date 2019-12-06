@@ -1,0 +1,48 @@
+---
+version: 1.0
+
+input:
+  - intf_name: ""
+  - device: ""
+
+vars:
+  - tries: 0
+  - maxtries: 1
+
+tasks:
+  start:
+    action: core.noop
+    next:
+      -
+        publish:
+          - msg: "<% ctx(ip) %> is C2 host!"
+        do:
+          - block_c2
+          - notify_slack
+
+  block_c2:
+    action: ansible.playbook
+    input:
+      playbook: "block_c2_v2.yml"
+      inventory_file: "inventory/lab.inv"
+      extra_vars:
+        - ip=<% ctx(ip) %>
+    next:
+      -
+        when: <% succeeded() %>
+        publish:
+          - msg: "IP <% ctx(ip) %> has been blocked."
+        do:
+          - notify_slack
+      -
+        when: <% failed() %>
+        publish:
+          - msg: "Failed to block IP: <% ctx(ip) %>."
+        do:
+          - notify_slack
+
+  notify_slack:
+    action: chatops.post_message
+    input:
+      channel: automation-lab
+      message: <% ctx("msg") %>

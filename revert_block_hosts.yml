@@ -1,0 +1,49 @@
+
+---
+- name: Block IP at EXOS switch
+  hosts: acc_sw3
+  gather_facts: no
+  vars:
+    exos_api_dir: "EXOS-API"
+    ansible_user: "admin"
+    config_dir: "conf"
+
+  tasks:
+
+  - name: Get files in blocked/ folder
+    delegate_to: localhost
+    find:
+      paths: "blocked/"
+      patterns: "hosts-*"
+    register: found_files
+
+  - debug: msg="No revert files found."
+    when: 'found_files.files|length == 0'
+
+  - meta: end_play
+    when: 'found_files.files|length == 0'
+
+  - name: Get latest file
+    set_fact:
+      latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+
+  - set_fact:
+      ip: "{{ lookup('file', latest_file.path)[0] }}"
+
+  - set_fact:
+      model_file: "models/del-dyn-acl.exos.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-block-ips.exos.conf"
+
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+
+  - name: Delete dyn ACL
+    delegate_to: localhost
+    command: "perl {{ exos_api_dir }}/execCliFile.pl \
+      {{ ansible_host }} {{ ansible_user }} {{ password }} {{ config_file }}"
+
+  - name: Clean blocked file
+    delegate_to: localhost
+    file:
+      state: absent
+      path: "{{ latest_file.path }}"

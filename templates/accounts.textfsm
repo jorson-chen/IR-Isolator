@@ -1,0 +1,8 @@
+Value name (\w+)
+Value profile (R/W|RO)
+Value login_success (\d+)
+Value login_failed (\d+)
+Value state (Enabled|Disabled)
+
+Start
+  ^\s+${name}\s+${profile}\s+${login_success}\s+${login_failed}\s+${state} -> Record

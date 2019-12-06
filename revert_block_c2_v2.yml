@@ -1,0 +1,98 @@
+- hosts: "{{ device }}"
+#  strategy: debug
+  vars:
+    username: "admin"
+    https: True
+    ssl_verify: False
+
+    addrgrp_name: "C2-Block"
+    c2arr: []
+
+  tasks:
+
+
+  - name: Get files in blocked/ folder
+    delegate_to: localhost
+    find:
+      paths: "blocked/"
+      patterns: "c2-*"
+    register: found_files
+
+  - debug: msg="No revert files found."
+    when: 'found_files.files|length == 0'
+
+  - meta: end_play
+    when: 'found_files.files|length == 0'
+
+  - name: Get latest file
+    set_fact:
+      latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+
+
+  - name: Get existing addrgrp information
+    delegate_to: localhost
+    fortiosconfig:
+      config: "firewall addrgrp"
+      action: "get"
+      host:  "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+    register: addrgrp_info
+
+  - set_fact:
+      qry1: "[?name=='{{ addrgrp_name }}']"
+
+  - set_fact:
+      addrgrp: "{{ addrgrp_info.meta.results | json_query(qry1) }}"
+      c2records: "{{ lookup('file', latest_file.path ) }}"
+
+  - set_fact:
+      c2arr: "{{ c2arr + [ item ] }}"
+    with_items: "{{ addrgrp.0.member }}"
+    when: "item.name[3:] not in c2records"
+
+  - debug: var=c2arr
+
+  - name: Configure IPv4 address groups
+    delegate_to: localhost
+    fortios_firewall_addrgrp:
+      host:  "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_addrgrp:
+        color: "4"
+        comment: "C2 IPs group"
+        member: "{{ c2arr }}"
+        name: "{{ addrgrp_name }}"
+        visibility: "enable"
+
+  - name: "Configuring firewall policy"
+    delegate_to: localhost
+    fortios_firewall_policy:
+      host:  "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_policy:
+        name: "C2 Blocking"
+        policyid: "500"
+        action: "deny"
+        srcintf: [{"name": "port4"}]
+        dstintf: [{"name":"virtual-wan-link"}]
+        srcaddr: [{"name":"all"}]
+        dstaddr: [{"name": "{{ addrgrp_name }}"}]
+        service: [{"name":"ALL"}]
+        schedule: "always"
+        logtraffic: "all"
+
+  - name: Clean blocked file
+    delegate_to: localhost
+    file:
+      state: absent
+      path: "{{ latest_file.path }}"

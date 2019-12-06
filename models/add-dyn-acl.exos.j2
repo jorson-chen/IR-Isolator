@@ -1,0 +1,3 @@
+create access-list "block-{{ ip }}" "source-address {{ ip }}/32;" "deny;"
+configure access-list add "block-{{ ip }}" first ports {{ port }}
+save

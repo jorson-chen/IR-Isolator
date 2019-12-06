@@ -1,0 +1,51 @@
+
+---
+- name: Block IP at EXOS switch
+  hosts: acc_sw3
+  gather_facts: no
+  vars:
+    exos_api_dir: "EXOS-API"
+    ansible_user: "admin"
+    config_dir: "conf"
+
+  tasks:
+
+  - name: Show iparp table
+    delegate_to: localhost
+    command: perl {{ exos_api_dir }}/execCli.pl \
+      {{ ansible_host }} {{ ansible_user }} {{ password }} "show iparp | grep {{ ip }}"
+    register: raw_iparp_info
+
+  - debug: var=raw_iparp_info
+
+  - set_fact:
+      iparp_info: "{{ raw_iparp_info.stdout | parse_cli_textfsm('templates/iparp_grep_ip.textfsm') }}"
+
+  - debug: var="No IP found."
+    when: "iparp_info|length == 0"
+
+  - meta: end_play
+    when: "iparp_info|length == 0"
+
+  - meta: end_play
+    when: "iparp_info.0.port|int >= 23"
+
+  - set_fact:
+      model_file: "models/add-dyn-acl.exos.j2"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-block-ips.exos.conf"
+      port: "{{ iparp_info.0.port|int }}"
+
+  - template: src={{ model_file }} dest={{ config_file }}
+    delegate_to: localhost
+
+  - name: Create dyn ACL
+    delegate_to: localhost
+    command: "perl {{ exos_api_dir }}/execCliFile.pl \
+      {{ ansible_host }} {{ ansible_user }} {{ password }} {{ config_file }}"
+
+  - name: Add IP to blocked list
+    delegate_to: localhost
+    lineinfile:
+      create: yes
+      path: "blocked/hosts-{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}.txt"
+      line: "{{ ip }}"

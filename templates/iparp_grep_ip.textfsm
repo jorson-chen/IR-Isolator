@@ -1,0 +1,11 @@
+Value vr ([-\w]+)
+Value ip_address ([\d\.]+)
+Value mac_address ([\w:]+)
+Value age (\d+)
+Value static (\w+)
+Value vlan (\w+)
+Value vid (\d+)
+Value port (\d+)
+
+Start
+  ^'${vr}\s+${ip_address}\s+${mac_address}\s+${age}\s+${static}\s+${vlan}\s+${vid}\s+${port} -> Record

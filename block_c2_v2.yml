@@ -1,0 +1,120 @@
+- hosts: "{{ device }}"
+#  strategy: debug
+  vars:
+    username: "admin"
+    https: True
+    ssl_verify: False
+
+    c2_input_file: "input/c2.txt"
+    addrgrp_name: "C2-Block"
+
+    c2arr: []
+
+  tasks:
+
+  - name: IP list is defined inline
+    set_fact:
+      ip_lines: "{{ ip.split(',') | join('\n') }}"
+    when: "ip is defined"
+
+  - delegate_to: localhost
+    file:
+      state: absent
+      path: "input/c2.txt"
+    when: "ip is defined"
+
+  - name: Filling input file from inline params
+    delegate_to: localhost
+    lineinfile:
+      create: yes
+      path: "input/c2.txt"
+      line: "{{ ip_lines }}"
+    when: "ip is defined"
+
+  - name: Get existing addrgrp information
+    delegate_to: localhost
+    fortiosconfig:
+      config: "firewall addrgrp"
+      action: "get"
+      host:  "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+    register: addrgrp_info
+
+  - set_fact:
+      qry: "[?name=='{{ addrgrp_name }}']"
+
+  - set_fact:
+      addrgrp: "{{ addrgrp_info.meta.results | json_query(qry) }}"
+
+  - set_fact:
+      c2arr: "{{ addrgrp.0.member }}"
+
+  - name: Configure IPv4 addresses
+    delegate_to: localhost
+    fortios_firewall_address:
+      host:  "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_address:
+        name: "C2-{{ item }}"
+        type: "ipmask"
+        comment: "C2 Host"
+        subnet: "{{ item }} 255.255.255.255"
+        visibility: "disable"
+    with_lines: "cat {{ c2_input_file }}"
+
+  - name: Adding item to c2 array
+    set_fact:
+      c2arr: "{{ c2arr + [{ 'name': 'C2-'+item }] }}"
+    with_lines: "cat {{ c2_input_file }}"
+    register: c2reg
+
+  - debug: var=c2arr
+
+  - name: Configure IPv4 address groups
+    delegate_to: localhost
+    fortios_firewall_addrgrp:
+      host:  "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_addrgrp:
+        color: "4"
+        comment: "C2 IPs group"
+        member: "{{ c2arr }}"
+        name: "{{ addrgrp_name }}"
+        visibility: "enable"
+
+  - name: "Configuring firewall policy"
+    delegate_to: localhost
+    fortios_firewall_policy:
+      host:  "{{ ansible_host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_policy:
+        name: "C2 Blocking"
+        policyid: "500"
+        action: "deny"
+        srcintf: [ {"name": "port4"} ]
+        dstintf: [{"name":"virtual-wan-link"} ]
+        srcaddr: [{"name":"all"} ]
+        dstaddr: [{"name": "{{ addrgrp_name }}" }]
+        service:  [{"name":"ALL"}]
+        schedule: "always"
+        logtraffic: "all"
+
+  - name: Add IPs to blocked list
+    delegate_to: localhost
+    copy:
+      src: input/c2.txt
+      dest: "blocked/c2-{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}.conf"

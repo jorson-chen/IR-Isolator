@@ -1,0 +1,91 @@
+- hosts: localhost
+#  strategy: debug
+  vars:
+    host: "172.17.31.10"
+    username: "admin"
+    vdom: "global"
+    c2file: "c2.txt"
+    addrgrp_name: "C2-Block"
+    ssl_verify: "False"
+    https: True
+    c2arr: []
+
+  tasks:
+
+  - name: Get existing addrgrp information
+    delegate_to: localhost
+    fortiosconfig:
+      config: "firewall addrgrp"
+      action: "get"
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+    register: addrgrp_info
+
+  - set_fact:
+      qry: "[?name=='{{ addrgrp_name }}']"
+
+  - set_fact:
+      addrgrp: "{{ addrgrp_info.meta.results | json_query(qry) }}"
+
+  - set_fact:
+      c2arr: "{{ addrgrp.0.member }}"
+
+  - name: Configure IPv4 addresses
+    fortios_firewall_address:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_address:
+        name: "C2-{{ item }}"
+        type: "ipmask"
+        comment: "C2 Host"
+        subnet: "{{ item }} 255.255.255.255"
+        visibility: "disable"
+    with_lines: "cat {{ c2file }}"
+
+  - name: Adding item to c2 array
+    set_fact:
+      c2arr: "{{ c2arr + [{ 'name': 'C2-'+item }] }}"
+    with_lines: "cat {{ c2file }}"
+    register: c2reg
+
+  - debug: var=c2arr
+
+  - name: Configure IPv4 address groups
+    fortios_firewall_addrgrp:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_addrgrp:
+        color: "4"
+        comment: "C2 IPs group"
+        member: "{{ c2arr }}"
+        name: "{{ addrgrp_name }}"
+        visibility: "enable"
+
+  - fortios_firewall_policy:
+      host:  "{{ host }}"
+      username: "{{ username }}"
+      password: "{{ password }}"
+      https: "{{ https }}"
+      ssl_verify: "{{ ssl_verify }}"
+      state: present
+      firewall_policy:
+        name: "C2 Blocking"
+        policyid: "500"
+        action: "deny"
+        srcintf: [ {"name": "port4"} ]
+        dstintf: [{"name":"virtual-wan-link"} ]
+        srcaddr: [{"name":"all"} ]
+        dstaddr: [{"name": "{{ addrgrp_name }}"}]
+        service:  [{"name":"ALL"}]
+        schedule: "always"
+        logtraffic: "all"
