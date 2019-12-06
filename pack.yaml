@@ -1,0 +1,10 @@
+---
+ref: "secops_lab"
+name: "secops_lab"
+description: "Ansible pack to automate security operations"
+keywords:
+  - "ansible"
+  - "lab"
+version: "0.1.0"
+author: "pr"
+email: "pr@solidex.lab"
