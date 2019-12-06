@@ -7,15 +7,16 @@ These Stackstorm workflows can be used during incident resoinse to isolate:
 - internal workstation using ACL (Extreme Networks switch)
 
 ### Preparation
-Install separate stackstorm-ansible environment.
-Note: when installing libraries in Stackstorm use `stanley` user and ansible virtual environment.
+Install separate stackstorm-ansible environment. This stackstorm-ansible is a copy of official repo but uses different pack name `ansible29` that allows to run ansible in a different virtual environment.
 ```
 st2 pack install git@github.com:solidex/stackstorm-ansible.git
+```
+Install libs. Note: when installing use `stanley` user and `ansible29` virtual environment.
+```
 sudo su stanley
-source /opt/stackstorm/virtualenvs/ansible/bin/activate
+source /opt/stackstorm/virtualenvs/ansible29/bin/activate
 pip install pyfg fortiosapi textfsm jmespath
 ```
-Note: stackstorm-ansible is a copy of official stackstorm-ansible but uses different pack name `ansible29` that allows to run ansible in a different virtual environment.
 ### There is an issue with fortiosapi.py (v1.0.1)
 If you are using FortiGate with self-signed (untrusted) certificates, please fix fortiosapi.py file near line 171 to have `verify=False`:
 ```
