@@ -1,0 +1,53 @@
+---
+version: 1.0
+
+input:
+  - ip: ""
+  - device: ""
+
+tasks:
+  start:
+    action: core.local
+    input:
+      cmd: cat `ls -rt | grep c2 | tail -1`
+      cwd: /opt/stackstorm/packs/secops_lab/blocked/
+    next:
+      - when: <% succeeded() %>
+        publish:
+          - msg: "Unblocking <% ctx().result %>"
+          - ips: <% ctx().result %>
+        do:
+          - revert_block_c2
+          - notify_slack
+      - when: <% failed() %>
+        publish:
+          - msg: "Nothing to unblock (/blocked dir is empty)"
+        do:
+          - notify_slack
+
+  revert_block_c2:
+    action: ansible29.playbook
+    input:
+      playbook: "revert_block_c2_v2.yml"
+      inventory_file: "inventory/lab.inv"
+      extra_vars:
+        - device=<% ctx(device) %>
+    next:
+      -
+        when: <% succeeded() %>
+        publish:
+          - msg: "IPs [ <% ctx(ips) %> ] has been un-blocked at <% ctx(device) %>."
+        do:
+          - notify_slack
+      -
+        when: <% failed() %>
+        publish:
+          - msg: "Failed to un-block IPs [ <% ctx(ips) %> ] at <% ctx(device) %>."
+        do:
+          - notify_slack
+
+  notify_slack:
+    action: chatops.post_message
+    input:
+      channel: automation-lab
+      message: <% ctx("msg") %>

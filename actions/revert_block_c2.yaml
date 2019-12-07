@@ -1,0 +1,13 @@
+---
+name: revert_block_c2
+pack: secops_lab
+description: Run action to revert previous block operation
+runner_type: orquesta
+entry_point: workflows/revert_block_c2.yaml
+enabled: true
+parameters:
+  device:
+    type: string
+    default: edge_utm
+  ip:
+    type: string

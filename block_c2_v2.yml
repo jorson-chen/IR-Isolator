@@ -117,4 +117,4 @@
     delegate_to: localhost
     copy:
       src: input/c2.txt
-      dest: "blocked/c2-{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}.conf"
+      dest: "blocked/c2-{{ lookup('pipe', 'date +%Y-%m-%d-%H-%M-%S') }}.txt"

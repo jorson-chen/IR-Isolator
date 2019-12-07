@@ -1,0 +1,7 @@
+---
+name: "block_c2"
+action_ref: "secops_lab.block_c2"
+description: "Block C2 host"
+formats:
+  - "block_c2 {{ip}}"
+  - "block_c2 {{ip}} on {{device}}"
