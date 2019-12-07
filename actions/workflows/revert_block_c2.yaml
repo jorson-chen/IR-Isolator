@@ -19,7 +19,7 @@ tasks:
         do:
           - revert_block_c2
           - notify_slack
-      - when: <% result().stdout == "" %>
+      - when: <% result().stdout = "" %>
         publish:
           - msg: "Nothing to unblock (/blocked dir is empty)"
         do:
