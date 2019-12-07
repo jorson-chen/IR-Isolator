@@ -12,14 +12,14 @@ tasks:
       cmd: cat `ls -rt | grep c2 | tail -1`
       cwd: /opt/stackstorm/packs/secops_lab/blocked/
     next:
-      - when: <% succeeded() %>
+      - when: <% result().stdout != "" %>
         publish:
-          - msg: "Unblocking <% result().stdout %>"
+          - msg: "Un-blocking IP adresses. IPs: <% result().stdout %>"
           - ips: <% result().stdout %>
         do:
           - revert_block_c2
           - notify_slack
-      - when: <% failed() %>
+      - when: <% result().stdout == "" %>
         publish:
           - msg: "Nothing to unblock (/blocked dir is empty)"
         do:
@@ -36,13 +36,13 @@ tasks:
       -
         when: <% succeeded() %>
         publish:
-          - msg: "IPs [ <% ctx(ips) %> ] has been un-blocked at <% ctx(device) %>."
+          - msg: "IP addresses have been un-blocked at <% ctx(device) %>. IPs: <% ctx(ips) %>"
         do:
           - notify_slack
       -
         when: <% failed() %>
         publish:
-          - msg: "Failed to un-block IPs [ <% ctx(ips) %> ] at <% ctx(device) %>."
+          - msg: "Failed to un-block IPs at <% ctx(device) %>."
         do:
           - notify_slack
 
