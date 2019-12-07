@@ -1,0 +1,7 @@
+---
+name: "revert_block_c2"
+action_ref: "secops_lab.revert_block_c2"
+description: "Unblock C2 host (revert last operation)"
+formats:
+  - "revert_block_c2"
+  - "revert_block_c2 on {{device}}"

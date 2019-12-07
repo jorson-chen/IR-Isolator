@@ -9,5 +9,3 @@ parameters:
   device:
     type: string
     default: edge_utm
-  ip:
-    type: string
