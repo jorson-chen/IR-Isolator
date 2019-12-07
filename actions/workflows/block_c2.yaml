@@ -28,13 +28,13 @@ tasks:
       -
         when: <% succeeded() %>
         publish:
-          - msg: "IP <% ctx(ip) %> has been blocked at <% ctx(device) %>."
+          - msg: "IP addresses have been blocked at <% ctx(device) %>. IPs: <% ctx(ip) %>"
         do:
           - notify_slack
       -
         when: <% failed() %>
         publish:
-          - msg: "Failed to block IP: <% ctx(ip) %> at <% ctx(device) %>."
+          - msg: "Failed to block IP addresses at <% ctx(device) %>. IPs: <% ctx(ip) %>"
         do:
           - notify_slack
 
