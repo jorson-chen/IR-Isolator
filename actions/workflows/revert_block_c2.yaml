@@ -14,8 +14,8 @@ tasks:
     next:
       - when: <% succeeded() %>
         publish:
-          - msg: "Unblocking <% ctx().result %>"
-          - ips: <% ctx().result %>
+          - msg: "Unblocking <% result().stdout %>"
+          - ips: <% result().stdout %>
         do:
           - revert_block_c2
           - notify_slack
