@@ -17,6 +17,10 @@ sudo su stanley
 source /opt/stackstorm/virtualenvs/ansible29/bin/activate
 pip install pyfg fortiosapi textfsm jmespath
 ```
+Install lib to use Extreme XOS API:
+```
+sudo apt-get install libsoap-lite-perl
+```
 ### Stackstorm usage (reminder)
 Login:
 ```
