@@ -31,6 +31,8 @@
       ip: "{{ lookup('file', latest_file.path)[0] }}"
 
   - shell: "/bin/rm -rf {{ config_dir }}/*"
+    delegate_to: localhost
+    run_once: true
 
   - set_fact:
       model_file: "models/del-dyn-acl.exos.j2"
