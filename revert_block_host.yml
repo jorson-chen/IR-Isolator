@@ -1,7 +1,7 @@
 
 ---
 - name: Block IP at EXOS switch
-  hosts: {{ device }}
+  hosts: "{{ device }}"
   gather_facts: no
   vars:
     exos_api_dir: "EXOS-API"
