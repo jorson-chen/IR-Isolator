@@ -1,0 +1,13 @@
+---
+name: block_host
+pack: secops_lab
+description: Run action to block host (user workstation)
+runner_type: orquesta
+entry_point: workflows/block_host.yaml
+enabled: true
+parameters:
+  device:
+    type: string
+    default: acc_sw3
+  ip:
+    type: string

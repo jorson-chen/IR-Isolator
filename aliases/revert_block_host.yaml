@@ -1,0 +1,7 @@
+---
+name: "revert_block_host"
+action_ref: "secops_lab.revert_block_host"
+description: "Unblock compromised host (revert last operation)"
+formats:
+  - "revert_block_host"
+  - "revert_block_host on {{device}}"

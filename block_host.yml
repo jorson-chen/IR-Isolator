@@ -1,7 +1,7 @@
 
 ---
 - name: Block IP at EXOS switch
-  hosts: acc_sw3
+  hosts: {{ device }}
   gather_facts: no
   vars:
     exos_api_dir: "EXOS-API"

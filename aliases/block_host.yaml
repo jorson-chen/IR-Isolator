@@ -1,0 +1,7 @@
+---
+name: "block_host"
+action_ref: "secops_lab.block_host"
+description: "Block compomised host (workstation)"
+formats:
+  - "block_host {{ip}}"
+  - "block_host {{ip}} on {{device}}"

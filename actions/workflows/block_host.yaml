@@ -1,0 +1,45 @@
+---
+version: 1.0
+
+input:
+  - ip: ""
+  - device: ""
+
+tasks:
+  start:
+    action: core.noop
+    next:
+      -
+        publish:
+          - msg: "<% ctx(ip) %> is compromised host!"
+        do:
+          - block_host
+          - notify_slack
+
+  block_host:
+    action: ansible29.playbook
+    input:
+      playbook: "block_host.yml"
+      inventory_file: "inventory/lab.inv"
+      extra_vars:
+        - ip=<% ctx(ip) %>
+        - device=<% ctx(device) %>
+    next:
+      -
+        when: <% succeeded() %>
+        publish:
+          - msg: "IP address has been blocked at <% ctx(device) %>. IP: <% ctx(ip) %>"
+        do:
+          - notify_slack
+      -
+        when: <% failed() %>
+        publish:
+          - msg: "Failed to block IP address at <% ctx(device) %>. IP: <% ctx(ip) %>"
+        do:
+          - notify_slack
+
+  notify_slack:
+    action: chatops.post_message
+    input:
+      channel: automation-lab
+      message: <% ctx("msg") %>

@@ -1,0 +1,11 @@
+---
+name: revert_block_host
+pack: secops_lab
+description: Run action to revert previous block operation
+runner_type: orquesta
+entry_point: workflows/revert_block_host.yaml
+enabled: true
+parameters:
+  device:
+    type: string
+    default: acc_sw3
