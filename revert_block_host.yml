@@ -30,9 +30,11 @@
   - set_fact:
       ip: "{{ lookup('file', latest_file.path)[0] }}"
 
+  - shell: "/bin/rm -rf {{ config_dir }}/*"
+
   - set_fact:
       model_file: "models/del-dyn-acl.exos.j2"
-      config_file: "{{ config_dir }}/{{ inventory_hostname }}-block-ips.exos.conf"
+      config_file: "{{ config_dir }}/{{ inventory_hostname }}-unblock-ips.exos.conf"
 
   - template: src={{ model_file }} dest={{ config_file }}
     delegate_to: localhost
