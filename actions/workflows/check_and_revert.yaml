@@ -25,7 +25,7 @@ tasks:
         do:
           - subworkflow_loop
           - notify_slack
-      - when: <% result().stdout == "" %>
+      - when: <% result().stdout = "" %>
         publish:
           - msg: "This is not my fault. Sorry."
         do:
