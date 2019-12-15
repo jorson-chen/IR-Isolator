@@ -60,7 +60,7 @@ class VectraPollDetectionsC2(Sensor):
             c2_detection_events = []
 
             for detection in detections:
-                if detection['detection_type'] in C2C2_DETECT_TYPES:
+                if detection['detection_type'] in C2_DETECT_TYPES:
                     if 'c2_auto_isolated' in detection['tags']:
                         print('there is tagged detection, ignoring: %s' % detection['src_ip'])
                         continue
