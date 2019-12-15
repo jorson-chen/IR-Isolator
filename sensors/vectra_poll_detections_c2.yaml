@@ -5,7 +5,7 @@ description: "Get C&C detections from Vectra IDS"
 poll_interval: 15
 trigger_types:
   -
-    name: "c2_detection_events"
+    name: "c2_connections"
     description: "C&C connection detected"
     payload_schema:
       type: "object"

@@ -57,7 +57,7 @@ class VectraPollDetectionsC2(Sensor):
             self._logger.debug('VectraPollDetectionsC2 dispatching trigger...')
             detections = self.get_detections()
 
-            c2_detection_events = []
+            c2_connections = []
 
             for detection in detections:
                 if detection['detection_type'] in C2_DETECT_TYPES:
@@ -67,17 +67,17 @@ class VectraPollDetectionsC2(Sensor):
 
                     print('there is a new detection: %s' % detection['src_ip'])
 
-                    c2_detection_events.append({'src_ip': detection['src_ip'], 'detection': detection['detection'],
+                    c2_connections.append({'src_ip': detection['src_ip'], 'detection': detection['detection'],
                                 'threat': detection['threat'], 'certainty': detection['certainty'],
                                 'dst_ips': detection['summary']['dst_ips']})
 
                     self.set_tag(detection)
 
-            payload = {'c2_detection_events': c2_detection_events}
+            payload = {'c2_connections': c2_connections}
 
-            if (len(payload['c2_detection_events']) != 0):
+            if (len(payload['c2_connections']) != 0):
                 self.sensor_service.dispatch(
-                    trigger='secops_lab.vectra_poll_detections_c2', payload=payload)
+                    trigger='secops_lab.c2_connection_detected', payload=payload)
             eventlet.sleep(10)
 
     def cleanup(self):
