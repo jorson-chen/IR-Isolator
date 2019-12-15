@@ -9,6 +9,8 @@ URL = "https://172.17.18.39/"
 TOKEN = "Token a270a1c2addcf4c58d6d2857495302038cef28a7"
 headers = {'Content-Type': 'application/json', 'Authorization': TOKEN}
 
+C2_DETECT_TYPES = [ 'External Remote Access' ]
+
 
 class VectraPollDetectionsC2(Sensor):
     def __init__(self, sensor_service, config):
@@ -58,18 +60,18 @@ class VectraPollDetectionsC2(Sensor):
             c2_detection_events = []
 
             for detection in detections:
+                if detectin['detection_type'] in C2C2_DETECT_TYPES:
+                    if 'c2_auto_isolated' in detection['tags']:
+                        print('there is tagged detection, ignoring: %s' % detection['src_ip'])
+                        continue
 
-                if 'c2_auto_isolated' in detection['tags']:
-                    print('there is tagged detection, ignoring: %s' % detection['src_ip'])
-                    continue
+                    print('there is a new detection: %s' % detection['src_ip'])
+                    
+                    c2_detection_events.append({'src_ip': detection['src_ip'], 'detection': detection['detection'],
+                                'threat': detection['threat'], 'certainty': detection['certainty'],
+                                'dst_ips': detection['summary']['dst_ips']})
 
-                print('there is a new detection: %s' % detection['src_ip'])
-                print('debug: %s' % detection['summary']['dst_ips'])
-                c2_detection_events.append({'src_ip': detection['src_ip'], 'detection': detection['detection'],
-                            'threat': detection['threat'], 'certainty': detection['certainty'],
-                            'dst_ips': detection['summary']['dst_ips']})
-
-                self.set_tag(detection)
+                    self.set_tag(detection)
 
             payload = {'c2_detection_events': c2_detection_events}
 
