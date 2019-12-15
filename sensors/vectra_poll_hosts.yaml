@@ -1,0 +1,11 @@
+---
+class_name: "VectraPollHosts"
+entry_point: "vectra_poll_hosts.py"
+description: "Get compromised hosts from Vectra IDS"
+poll_interval: 15
+trigger_types:
+  -
+    name: "compromised_host_detected"
+    description: "Compromised host detected"
+    payload_schema:
+      type: "object"

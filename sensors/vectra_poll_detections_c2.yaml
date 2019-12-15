@@ -1,0 +1,11 @@
+---
+class_name: "VectraPollDetectionsC2"
+entry_point: "vectra_poll_detections_c2.py"
+description: "Get C&C detections from Vectra IDS"
+poll_interval: 15
+trigger_types:
+  -
+    name: "c2_connection_detected"
+    description: "C&C connection detected"
+    payload_schema:
+      type: "object"
