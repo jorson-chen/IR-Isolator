@@ -66,7 +66,7 @@ class VectraPollDetectionsC2(Sensor):
                 print('there is a new host: %s' % detection['src_ip'])
                 c2_detection_events.append({'src_ip': detection['src_ip'], 'detection': detection['detection'],
                             'threat': detection['threat'], 'certainty': detection['certainty'],
-                            'dst_ips': detection['dst_ips']})
+                            'dst_ips': detection['summary']['dst_ips']})
 
                 self.set_tag(detection)
 
