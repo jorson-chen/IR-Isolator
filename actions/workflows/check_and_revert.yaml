@@ -15,7 +15,7 @@ tasks:
   find_blocked:
     action: core.local
     input:
-      cmd: find . -mmin -10 | grep c2
+      cmd: find ./c2-* -mmin -10
       cwd: /opt/stackstorm/packs/secops_lab/blocked/
     next:
       - when: <% result().stdout != "" %>
@@ -25,7 +25,7 @@ tasks:
         do:
           - subworkflow_loop
           - notify_slack
-      - when: <% result().stdout = "" %>
+      - when: <% result().stdout == "" %>
         publish:
           - msg: "This is not my fault. Sorry."
         do:
