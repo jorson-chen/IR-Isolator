@@ -21,11 +21,9 @@
   - set_fact:
       iparp_info: "{{ raw_iparp_info.stdout | parse_cli_textfsm('templates/iparp_grep_ip.textfsm') }}"
 
-  - debug:
-      msg: "No IP found."
-    when: "iparp_info|length == 0"
-
-  - meta: end_play
+  - name: No IP found
+    fail:
+      msg: "the command failed"
     when: "iparp_info|length == 0"
 
   - meta: end_play
