@@ -34,7 +34,7 @@ tasks:
   subworkflow_loop:
     action: core.local
     input:
-      cmd: find . -mmin -10 | grep c2
+      cmd: find ./c2-* -mmin -10
       cwd: /opt/stackstorm/packs/secops_lab/blocked/
     next:
       - when: <% result().stdout != "" %>
