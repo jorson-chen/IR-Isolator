@@ -41,6 +41,10 @@ st2ctl reload --register-aliases
 st2 action-alias list
 sudo service st2chatops restart
 ```
+Sensor diagnostics
+```
+sudo /opt/stackstorm/st2/bin/st2sensorcontainer --config-file=/etc/st2/st2.conf --sensor-ref=secops_lab.VectraPollHosts
+```
 ### There is an issue with fortiosapi.py (v1.0.1)
 If you are using FortiGate with self-signed (untrusted) certificates, please fix fortiosapi.py file near line 171 to have `verify=False`:
 ```

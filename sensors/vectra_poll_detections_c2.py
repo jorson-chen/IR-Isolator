@@ -10,7 +10,7 @@ TOKEN = "Token a270a1c2addcf4c58d6d2857495302038cef28a7"
 headers = {'Content-Type': 'application/json', 'Authorization': TOKEN}
 
 
-class VectraPolldetectionsC2(Sensor):
+class VectraPollDetectionsC2(Sensor):
     def __init__(self, sensor_service, config):
         super(VectraPolldetectionsC2, self).__init__(
             sensor_service=sensor_service, config=config)
@@ -32,7 +32,7 @@ class VectraPolldetectionsC2(Sensor):
             return response.json()['results']
 
         print('no detections received')
-        return [] 
+        return []
 
     def set_tag(self, detection):
 
