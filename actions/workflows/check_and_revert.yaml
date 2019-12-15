@@ -1,0 +1,65 @@
+---
+version: 1.0
+
+tasks:
+  start:
+    action: core.noop
+    next:
+      -
+        publish:
+          - msg: "I'll check last 10 minutes..."
+        do:
+          - find_blocked
+          - notify_slack
+
+  find_blocked:
+    action: core.local
+    input:
+      cmd: find . -mmin -10 | grep c2
+      cwd: /opt/stackstorm/packs/secops_lab/blocked/
+    next:
+      - when: <% result().stdout != "" %>
+        publish:
+          - msg: "There were some C2 block operations. I'll revert them!"
+          - ips: <% result().stdout %>
+        do:
+          - subworkflow_loop
+          - notify_slack
+      - when: <% result().stdout = "" %>
+        publish:
+          - msg: "This is not my fault. Sorry."
+        do:
+          - notify_slack
+
+  subworkflow_loop:
+    action: core.local
+    input:
+      cmd: find . -mmin -10 | grep c2
+      cwd: /opt/stackstorm/packs/secops_lab/blocked/
+    next:
+      - when: <% result().stdout != "" %>
+        do:
+          - subworkflow
+      - when: <% result().stdout = "" %>
+        publish:
+          - msg: "I have reverted all operations! I hope you are ok now."
+        do:
+          - notify_slack
+
+  subworkflow:
+    action: secops_lab.revert_block_c2
+    next:
+      - when: <% succeeded() %>
+        do:
+          - subworkflow_loop
+      - when: <% failed() %>
+        publish:
+          - msg: "There was a problem during revert operation!"
+        do:
+          - notify_slack
+
+  notify_slack:
+    action: chatops.post_message
+    input:
+      channel: automation-lab
+      message: <% ctx("msg") %>
