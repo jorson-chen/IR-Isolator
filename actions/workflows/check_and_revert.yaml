@@ -7,7 +7,7 @@ tasks:
     next:
       -
         publish:
-          - msg: "Oh, no! Seem like we killed an app! :fire: I'll check last 10 minutes..."
+          - msg: "Oh, no! Seems like I killed an app! :fire: I'll check my 10 minutes log..."
         do:
           - find_blocked
           - notify_slack
@@ -27,7 +27,7 @@ tasks:
           - notify_slack
       - when: <% result().stdout = "" %>
         publish:
-          - msg: "This is not my fault. Sorry."
+          - msg: "I didn't do anything. Sorry."
         do:
           - notify_slack
 
