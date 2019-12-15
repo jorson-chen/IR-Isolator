@@ -3,5 +3,5 @@ name: check_and_revert
 pack: secops_lab
 description: Check and revert previous block operations
 runner_type: orquesta
-entry_point: workflows/check_and_rever.yaml
+entry_point: workflows/check_and_revert.yaml
 enabled: true
