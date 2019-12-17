@@ -45,6 +45,10 @@ Sensor diagnostics
 ```
 sudo /opt/stackstorm/st2/bin/st2sensorcontainer --config-file=/etc/st2/st2.conf --sensor-ref=secops_lab.VectraPollHosts
 ```
+Webhook test:
+```
+curl -X POST -k https://x.x.x.x/api/v1/webhooks/revert/app_is_down -H "St2-Api-Key: <key>" -H "Content-Type: application/json"
+```
 ### There is an issue with fortiosapi.py (v1.0.1)
 If you are using FortiGate with self-signed (untrusted) certificates, please fix fortiosapi.py file near line 171 to have `verify=False`:
 ```

@@ -7,7 +7,7 @@ tasks:
     next:
       -
         publish:
-          - msg: "Oh, no! Seems like I killed an app! :fire: I'll check my 10 minutes log..."
+          - msg: ":fire: Oh, no! Seems like I killed an app! I'll check my 10 minutes log..."
         do:
           - find_blocked
           - notify_slack
@@ -42,7 +42,7 @@ tasks:
           - subworkflow
       - when: <% result().stdout = "" %>
         publish:
-          - msg: "I have reverted all operations! :sunglasses: I hope you are ok now."
+          - msg: "I have reverted all operations! I hope you are ok now :sunglasses: "
         do:
           - notify_slack
 
